@@ -27,12 +27,14 @@ class SplashScreenService(private val coroutineScope: CoroutineScope) {
     fun configure(enabled: Boolean, imagePath: String) {
         if (unloading) return
         val previous = settings.state
-        val images = if (enabled) {
-            val source = SplashScreenImages.load(imagePath)
-            val key = currentSplashKey()
-            splashScales().associate { scale -> key.fileName(scale) to SplashScreenImages.render(source, scale) }
-        } else {
-            emptyMap()
+        val images = when {
+            enabled -> {
+                val source = SplashScreenImages.load(imagePath)
+                val key = currentSplashKey()
+                splashScales().associate { scale -> key.fileName(scale) to SplashScreenImages.render(source, scale) }
+            }
+
+            else -> emptyMap()
         }
         val entries = cache.replace(images, previous.cacheEntries)
         settings.loadState(SplashScreenSettings.State(enabled, imagePath, entries))

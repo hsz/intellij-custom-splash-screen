@@ -11,10 +11,17 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <postStartupActivity implementation="info.chrzanowski.customsplashscreen.SplashStartupActivity"/>
-        <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
         <applicationConfigurable parentId="appearance" id="info.chrzanowski.customsplashscreen.splash"
                                  instance="info.chrzanowski.customsplashscreen.SplashScreenConfigurable"
                                  bundle="messages.SplashScreenBundle" key="splash.settings.title"/>
+        <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
+        <postStartupActivity implementation="info.chrzanowski.customsplashscreen.SplashStartupActivity"/>
     </extensions>
+
+    <applicationListeners>
+        <listener class="info.chrzanowski.customsplashscreen.SplashScreenLifecycleListener"
+                  topic="com.intellij.ide.AppLifecycleListener"/>
+        <listener class="info.chrzanowski.customsplashscreen.SplashScreenLifecycleListener"
+                  topic="com.intellij.ide.plugins.DynamicPluginListener"/>
+    </applicationListeners>
 </idea-plugin>
