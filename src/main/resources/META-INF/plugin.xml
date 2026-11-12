@@ -4,8 +4,15 @@
     <name>Custom Splash Screen</name>
     <vendor url="https://www.chrzanowski.info">Jakub Chrzanowski</vendor>
     <description><![CDATA[
-        Enter short description for your plugin here.<br>
-        <em>most HTML tags may be used</em>
+        <p>Replace your JetBrains IDE's startup splash screen with an image you choose.
+        Pick a bundled image or use your own photo, artwork, or logo.</p>
+        <p>Works across the <strong>JetBrains IDE family</strong>, including IntelliJ IDEA, PyCharm, Rider,
+        WebStorm, PhpStorm, GoLand, CLion, and more.</p>
+        <p>Open <strong>Settings | Appearance &amp; Behavior | Custom Splash Screen</strong>,
+        enable <strong>Use a custom splash image</strong>, and choose an image. Click <strong>Apply</strong>
+        and restart your IDE. Supports PNG, JPEG, GIF, and BMP files up to 20 MiB and 16 megapixels.</p>
+        <p>Currently, supports IDEs based on IntelliJ Platform 2026.2. After an IDE update, cache reset,
+        or display-scale change, the default splash may appear once before your image is reapplied.</p>
         ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
