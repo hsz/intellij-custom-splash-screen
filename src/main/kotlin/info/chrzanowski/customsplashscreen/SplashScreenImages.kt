@@ -1,5 +1,8 @@
 package info.chrzanowski.customsplashscreen
 
+import com.intellij.ui.JreHiDpiUtil
+import com.intellij.ui.scale.JBUIScale
+import com.intellij.util.RetinaImage
 import java.awt.AlphaComposite
 import java.awt.Color
 import java.awt.RenderingHints
@@ -17,6 +20,17 @@ internal object SplashScreenImages {
 
     private const val MAX_FILE_SIZE = 20L * 1024 * 1024
     private const val MAX_PIXELS = 16_000_000L
+
+    fun loadPreview(imagePath: String): BufferedImage {
+        val hiDpi = JreHiDpiUtil.isJreHiDPIEnabled()
+        val scale = JBUIScale.scale(1f) * if (hiDpi) JBUIScale.sysScale() else 1f
+        val image = render(load(imagePath), scale)
+        return if (hiDpi) {
+            RetinaImage.createFrom(image, scale.toDouble(), null) as BufferedImage
+        } else {
+            image
+        }
+    }
 
     fun load(imagePath: String): BufferedImage {
         if (imagePath.isBlank()) throw IOException(SplashScreenBundle["splash.error.empty"])

@@ -5,6 +5,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.options.SearchableConfigurable
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.Disposer
 import com.intellij.platform.ide.progress.ModalTaskOwner
@@ -17,7 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.awt.BorderLayout
 import java.io.IOException
-import javax.swing.ImageIcon
 import javax.swing.JButton
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -26,9 +26,7 @@ class SplashScreenConfigurable : SearchableConfigurable {
 
     private var enabled: JBCheckBox? = null
     private var imagePath: TextFieldWithBrowseButton? = null
-    private var preview: JBLabel? = null
     private var disposable: Disposable? = null
-    private var refreshRequested = false
 
     override fun getId() = "org.jetbrains.plugins.template.splash"
 
@@ -36,6 +34,8 @@ class SplashScreenConfigurable : SearchableConfigurable {
 
     override fun createComponent(): JComponent {
         val uiDisposable = Disposer.newDisposable().also { disposable = it }
+        val preview = SplashScreenPreview()
+        Disposer.register(uiDisposable, preview)
         val enabledField = JBCheckBox(SplashScreenBundle["splash.settings.enabled"]).also { enabled = it }
         val pathField = TextFieldWithBrowseButton(null, uiDisposable).also { imagePath = it }
         pathField.addBrowseFolderListener(
@@ -44,23 +44,20 @@ class SplashScreenConfigurable : SearchableConfigurable {
                 .withTitle(SplashScreenBundle["splash.settings.choose"])
                 .withExtensionFilter(SplashScreenBundle["splash.settings.images"], "png", "jpg", "jpeg", "gif", "bmp"),
         )
-        val previewLabel = JBLabel().also { preview = it }
         val previewButton = JButton(SplashScreenBundle["splash.settings.preview"]).apply {
             addActionListener {
+                preview.dispose()
                 val selectedPath = pathField.text
                 try {
                     val image = runWithModalProgressBlocking(
                         ModalTaskOwner.component(this),
                         SplashScreenBundle["splash.settings.loading"],
                     ) {
-                        withContext(Dispatchers.IO) { SplashScreenImages.render(SplashScreenImages.load(selectedPath), 0.5f) }
+                        withContext(Dispatchers.IO) { SplashScreenImages.loadPreview(selectedPath) }
                     }
-                    previewLabel.icon = ImageIcon(image)
-                    previewLabel.text = ""
-                    refreshRequested = true
+                    preview.show(image)
                 } catch (error: IOException) {
-                    previewLabel.icon = null
-                    previewLabel.text = error.localizedMessage
+                    Messages.showErrorDialog(this, error.localizedMessage, displayName)
                 }
             }
         }
@@ -74,7 +71,6 @@ class SplashScreenConfigurable : SearchableConfigurable {
             .addComponent(previewButton)
             .addComponent(JBLabel(SplashScreenBundle["splash.settings.help"]).apply { setCopyable(true) })
             .addComponent(JBLabel(SplashScreenBundle["splash.settings.experimental"]).apply { setCopyable(true) })
-            .addComponent(previewLabel)
             .panel
         reset()
         previewButton.isEnabled = enabledField.isSelected
@@ -85,7 +81,7 @@ class SplashScreenConfigurable : SearchableConfigurable {
         val enabledValue = enabled?.isSelected ?: return false
         val path = imagePath?.text ?: return false
         val state = service<SplashScreenSettings>().state
-        return refreshRequested || enabledValue != state.enabled || path != state.imagePath
+        return enabledValue != state.enabled || path != state.imagePath
     }
 
     override fun apply() {
@@ -100,7 +96,6 @@ class SplashScreenConfigurable : SearchableConfigurable {
             ) {
                 withContext(Dispatchers.IO) { service<SplashScreenService>().configure(enabledValue, path) }
             }
-            refreshRequested = false
         } catch (error: IOException) {
             throw ConfigurationException(error.localizedMessage, SplashScreenBundle["splash.settings.title"])
         }
@@ -108,12 +103,9 @@ class SplashScreenConfigurable : SearchableConfigurable {
 
     override fun reset() {
         val state = service<SplashScreenSettings>().state
-        refreshRequested = false
         enabled?.isSelected = state.enabled
         imagePath?.text = state.imagePath
         imagePath?.isEnabled = state.enabled
-        preview?.icon = null
-        preview?.text = ""
     }
 
     override fun disposeUIResources() {
@@ -121,7 +113,5 @@ class SplashScreenConfigurable : SearchableConfigurable {
         disposable = null
         enabled = null
         imagePath = null
-        preview = null
-        refreshRequested = false
     }
 }
