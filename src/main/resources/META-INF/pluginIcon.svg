@@ -1,12 +1,31 @@
-<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M32.0845 7.94025V4H24.0203V7.9896H16.029V4H7.91553V7.94025H4V36H16.0044V32.0045C16.0058 30.9457 16.4274 29.9308 17.1766 29.1826C17.9258 28.4345 18.9412 28.0143 20 28.0143C21.0588 28.0143 22.0743 28.4345 22.8234 29.1826C23.5726 29.9308 23.9942 30.9457 23.9956 32.0045V36H36V7.94025H32.0845Z"
-          fill="url(#paint0_linear)"/>
-    <defs>
-        <linearGradient id="paint0_linear" x1="2.94192" y1="4.89955" x2="37.7772" y2="39.7345"
-                        gradientUnits="userSpaceOnUse">
-            <stop offset="0.15937" stop-color="#3BEA62"/>
-            <stop offset="0.5404" stop-color="#3C99CC"/>
-            <stop offset="0.93739" stop-color="#6B57FF"/>
-        </linearGradient>
-    </defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
+  <title>Custom Splash Screen</title>
+  <desc>A colorful dawn on a startup screen, layered over a swappable artwork card.</desc>
+  <defs>
+    <linearGradient id="card" x1="7" y1="5" x2="36" y2="30" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B285FF"/>
+      <stop offset="1" stop-color="#57E5D5"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="15.5" y1="12" x2="15.5" y2="25" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE6A5"/>
+      <stop offset="1" stop-color="#FF806C"/>
+    </linearGradient>
+    <linearGradient id="wave" x1="5" y1="22" x2="35" y2="29" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9565F5"/>
+      <stop offset="1" stop-color="#6653D9"/>
+    </linearGradient>
+    <clipPath id="artwork">
+      <rect x="5" y="11" width="30" height="18" rx="3"/>
+    </clipPath>
+  </defs>
+  <rect x="7" y="5" width="29" height="25" rx="4" transform="rotate(10 21.5 17.5)" fill="url(#card)"/>
+  <rect x="3" y="9" width="34" height="26" rx="5" fill="#17152E" stroke="#B6ACED" stroke-width="1.5"/>
+  <g clip-path="url(#artwork)">
+    <rect x="5" y="11" width="30" height="18" fill="#292449"/>
+    <circle cx="15.5" cy="18.5" r="6.5" fill="url(#sun)"/>
+    <path d="M5 24C11 17 17 20 22 23C27 26 31 22 35 18V29H5Z" fill="url(#wave)"/>
+    <path d="M5 28C14 31 21 29 26 25C30 22 32 18 35 17V29H5Z" fill="#57E5D5"/>
+  </g>
+  <path d="M8 32H32" stroke="#49435F" stroke-width="2" stroke-linecap="round"/>
+  <path d="M8 32H21" stroke="#57E5D5" stroke-width="2" stroke-linecap="round"/>
 </svg>
