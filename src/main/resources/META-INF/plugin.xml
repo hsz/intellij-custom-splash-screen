@@ -1,0 +1,20 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>info.chrzanowski.customsplashscreen</id>
+    <name>Custom Splash Screen</name>
+    <vendor url="https://www.chrzanowski.info">Jakub Chrzanowski</vendor>
+    <description><![CDATA[
+        Enter short description for your plugin here.<br>
+        <em>most HTML tags may be used</em>
+        ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="info.chrzanowski.customsplashscreen.SplashStartupActivity"/>
+        <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
+        <applicationConfigurable parentId="appearance" id="info.chrzanowski.customsplashscreen.splash"
+                                 instance="info.chrzanowski.customsplashscreen.SplashScreenConfigurable"
+                                 bundle="messages.SplashScreenBundle" key="splash.settings.title"/>
+    </extensions>
+</idea-plugin>
