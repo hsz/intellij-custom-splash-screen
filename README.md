@@ -7,6 +7,15 @@
 
 This repository implements an IntelliJ Platform plugin.
 
+### Bundled splash images
+
+In **Settings | Appearance & Behavior | Custom Splash Screen**, enable the custom splash and select a bundled
+thumbnail or choose **Custom image** to use a local file. Apply and restart the IDE to see the selected image.
+
+To contribute a bundled splash, add a PNG file to `src/main/resources/splashes/` (subdirectories are supported).
+The settings gallery discovers PNG resources automatically, including in the packaged plugin; no image list or code
+changes are needed. Images must be no larger than 20 MiB and 16 megapixels.
+
 ## Plugin structure
 
 A generated project contains the following content structure:

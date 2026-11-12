@@ -5,6 +5,7 @@ import java.awt.Color
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 import java.io.IOException
+import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.InvalidPathException
 import java.nio.file.Path
@@ -18,7 +19,19 @@ internal object SplashScreenImages {
     private const val MAX_FILE_SIZE = 20L * 1024 * 1024
     private const val MAX_PIXELS = 16_000_000L
 
-    fun load(imagePath: String): BufferedImage {
+    fun load(
+        imagePath: String,
+        bundledImage: String = "",
+        classLoader: ClassLoader = javaClass.classLoader,
+    ): BufferedImage {
+        if (bundledImage.isNotEmpty()) {
+            if (!BundledSplashImages.isSplashResource(bundledImage)) {
+                throw IOException(SplashScreenBundle["splash.error.bundled", bundledImage])
+            }
+            val stream = classLoader.getResourceAsStream(bundledImage)
+                ?: throw IOException(SplashScreenBundle["splash.error.bundled", bundledImage])
+            return stream.use { read(it) }
+        }
         if (imagePath.isBlank()) throw IOException(SplashScreenBundle["splash.error.empty"])
         val path = try {
             Path.of(imagePath)
@@ -30,8 +43,14 @@ internal object SplashScreenImages {
         }
         if (Files.size(path) > MAX_FILE_SIZE) throw IOException(SplashScreenBundle["splash.error.fileSize"])
 
-        Files.newInputStream(path).use { stream ->
-            MemoryCacheImageInputStream(stream).use { input ->
+        return Files.newInputStream(path).use { read(it) }
+    }
+
+    private fun read(stream: InputStream): BufferedImage {
+        val bytes = stream.readNBytes((MAX_FILE_SIZE + 1).toInt())
+        if (bytes.size > MAX_FILE_SIZE) throw IOException(SplashScreenBundle["splash.error.fileSize"])
+        bytes.inputStream().use { buffered ->
+            MemoryCacheImageInputStream(buffered).use { input ->
                 val readers = ImageIO.getImageReaders(input)
                 if (!readers.hasNext()) throw IOException(SplashScreenBundle["splash.error.format"])
                 val reader = readers.next()

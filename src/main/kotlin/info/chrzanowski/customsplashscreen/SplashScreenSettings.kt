@@ -13,6 +13,7 @@ class SplashScreenSettings : PersistentStateComponent<SplashScreenSettings.State
         var enabled: Boolean = false,
         var imagePath: String = "",
         var cacheEntries: MutableList<SplashCacheEntry> = mutableListOf(),
+        var bundledImage: String = "",
     )
 
     @Volatile

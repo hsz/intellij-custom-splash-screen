@@ -24,12 +24,12 @@ class SplashScreenService(private val coroutineScope: CoroutineScope) {
     private val cache get() = SplashScreenCache(PathManager.getSystemDir().resolve("splash"))
 
     @Synchronized
-    fun configure(enabled: Boolean, imagePath: String) {
+    fun configure(enabled: Boolean, imagePath: String, bundledImage: String = "") {
         if (unloading) return
         val previous = settings.state
         val images = when {
             enabled -> {
-                val source = SplashScreenImages.load(imagePath)
+                val source = SplashScreenImages.load(imagePath, bundledImage)
                 val key = currentSplashKey()
                 splashScales().associate { scale -> key.fileName(scale) to SplashScreenImages.render(source, scale) }
             }
@@ -37,7 +37,7 @@ class SplashScreenService(private val coroutineScope: CoroutineScope) {
             else -> emptyMap()
         }
         val entries = cache.replace(images, previous.cacheEntries)
-        settings.loadState(SplashScreenSettings.State(enabled, imagePath, entries))
+        settings.loadState(SplashScreenSettings.State(enabled, imagePath, entries, bundledImage))
     }
 
     fun scheduleRefresh() {
@@ -49,7 +49,7 @@ class SplashScreenService(private val coroutineScope: CoroutineScope) {
                 if (unloading) return@synchronized
                 val state = settings.state
                 try {
-                    configure(state.enabled, state.imagePath)
+                    configure(state.enabled, state.imagePath, state.bundledImage)
                 } catch (error: IOException) {
                     thisLogger().warn(
                         "Cannot prepare the custom splash image; restoring the default for the next launch",
