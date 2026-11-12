@@ -9,6 +9,7 @@ import java.awt.Component
 import java.awt.Container
 import javax.swing.JButton
 import javax.swing.JRadioButton
+import javax.swing.SwingUtilities
 
 class SplashScreenGalleryTest : LightPlatformTestCase() {
 
@@ -26,6 +27,24 @@ class SplashScreenGalleryTest : LightPlatformTestCase() {
         } finally {
             super.tearDown()
         }
+    }
+
+    fun testPreviewIsProminentInTheTopRow() {
+        val component = configurable.createComponent()
+        component.size = component.preferredSize
+        val controls = descendants(component)
+        controls.filterIsInstance<Container>().forEach { it.doLayout() }
+        val enabled = controls.filterIsInstance<JBCheckBox>().single()
+        val preview = controls.filterIsInstance<JButton>().single { it.text == SplashScreenBundle["splash.settings.preview"] }
+        val bundled = controls.filterIsInstance<JRadioButton>().single { it.text == SplashScreenBundle["splash.settings.bundled"] }
+        val previewPosition = SwingUtilities.convertPoint(preview, 0, 0, component)
+        val bundledPosition = SwingUtilities.convertPoint(bundled, 0, 0, component)
+
+        assertTrue("Preview must appear above the image sources", previewPosition.y < bundledPosition.y)
+        assertSame("Preview must share the top row with the enable checkbox", enabled.parent, preview.parent)
+        assertNotNull("Preview must have a recognizable icon", preview.icon)
+        assertFalse("Preview must explain that it does not save changes", preview.toolTipText.isNullOrBlank())
+        assertFalse(configurable.isModified)
     }
 
     fun testResetRestoresBundledSelectionAndEnabledState() {

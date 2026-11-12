@@ -1,5 +1,6 @@
 package info.chrzanowski.customsplashscreen
 
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
@@ -15,6 +16,7 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
 import kotlinx.coroutines.Dispatchers
@@ -107,7 +109,8 @@ class SplashScreenConfigurable : SearchableConfigurable {
         } else {
             JBScrollPane(imageList).apply { preferredSize = JBUI.size(620, 220) }
         }
-        val previewButton = JButton(SplashScreenBundle["splash.settings.preview"]).apply {
+        val previewButton = JButton(SplashScreenBundle["splash.settings.preview"], AllIcons.Actions.Preview).apply {
+            toolTipText = SplashScreenBundle["splash.settings.preview.tooltip"]
             addActionListener {
                 preview.dispose()
                 val selectedPath = pathField.text
@@ -130,15 +133,26 @@ class SplashScreenConfigurable : SearchableConfigurable {
         enabledField.addItemListener { updateEnabledState() }
         bundledOption.addItemListener { updateEnabledState() }
         customOption.addItemListener { updateEnabledState() }
+        val header = JPanel(BorderLayout(JBUI.scale(16), 0)).apply {
+            add(enabledField, BorderLayout.CENTER)
+            add(previewButton, BorderLayout.EAST)
+        }
+        val description = panel {
+            group(SplashScreenBundle["splash.settings.help.title"]) {
+                row { text(SplashScreenBundle["splash.settings.help"]) }
+                row { comment(SplashScreenBundle["splash.settings.requirements"]) }
+                row { comment(SplashScreenBundle["splash.settings.experimental"]) }
+            }
+        }
         val form = FormBuilder.createFormBuilder()
-            .addComponent(enabledField)
+            .addComponent(header)
+            .addVerticalGap(8)
             .addComponent(bundledOption)
             .addComponent(bundledPicker)
             .addComponent(customOption)
             .addLabeledComponent(SplashScreenBundle["splash.settings.path"], pathField)
-            .addComponent(previewButton)
-            .addComponent(JBLabel(SplashScreenBundle["splash.settings.help"]).apply { setCopyable(true) })
-            .addComponent(JBLabel(SplashScreenBundle["splash.settings.experimental"]).apply { setCopyable(true) })
+            .addVerticalGap(12)
+            .addComponent(description)
             .panel
         reset()
         return JPanel(BorderLayout()).apply { add(form, BorderLayout.NORTH) }

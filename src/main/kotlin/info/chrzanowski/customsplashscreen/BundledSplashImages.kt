@@ -19,7 +19,7 @@ internal object BundledSplashImages {
             when (root.protocol) {
                 "file" -> scanDirectory(Path.of(root.toURI()), images)
                 "jar" -> {
-                    val connection = root.openConnection() as JarURLConnection
+                    val connection = root.toURI().toURL().openConnection() as JarURLConnection
                     connection.useCaches = false
                     connection.jarFile.use { scanJar(it, images) }
                 }
