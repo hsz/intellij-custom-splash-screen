@@ -11,7 +11,7 @@
         <p>Open <strong>Settings | Appearance &amp; Behavior | Custom Splash Screen</strong>,
         enable <strong>Use a custom splash image</strong>, and choose an image. Click <strong>Apply</strong>
         and restart your IDE. Supports PNG, JPEG, GIF, and BMP files up to 20 MiB and 16 megapixels.</p>
-        <p>Currently, supports IDEs based on IntelliJ Platform 2026.2. After an IDE update, cache reset,
+        <p>No upper IDE-version restriction. After an IDE update, cache reset,
         or display-scale change, the default splash may appear once before your image is reapplied.</p>
         ]]></description>
 

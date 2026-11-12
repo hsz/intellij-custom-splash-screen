@@ -78,11 +78,18 @@ class SplashScreenService(private val coroutineScope: CoroutineScope) {
     }
 }
 
-internal fun currentSplashKey(): SplashCacheKey {
-    val appInfo = ApplicationInfo.getInstance()
-    if (appInfo.build.baselineVersion != 262) throw IOException(SplashScreenBundle["splash.error.version"])
+internal fun currentSplashKey(appInfo: ApplicationInfo = ApplicationInfo.getInstance()): SplashCacheKey {
     val resourcePath =
         appInfo.splashImageUrl?.removePrefix("/") ?: throw IOException(SplashScreenBundle["splash.error.unavailable"])
+    if (appInfo.build.baselineVersion >= 263) {
+        val resourceSize =
+            ApplicationInfo::class.java.classLoader.getResourceAsStream(resourcePath)?.use { it.available() } ?: 0
+        return if (appInfo.build.baselineVersion >= 271) {
+            SplashCacheKey.installedV3(appInfo.build.asString(), resourcePath, resourceSize)
+        } else {
+            SplashCacheKey.installedV2(appInfo.build.asString(), resourcePath, resourceSize)
+        }
+    }
     val buildTime =
         appInfo.buildDate?.toInstant()?.epochSecond ?: throw IOException(SplashScreenBundle["splash.error.unavailable"])
     return SplashCacheKey.installed(buildTime, resourcePath)

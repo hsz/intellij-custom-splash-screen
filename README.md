@@ -12,4 +12,4 @@ Works across the **JetBrains IDE family**, including **IntelliJ IDEA, PyCharm, R
 
 Supports PNG, JPEG, GIF, and BMP files up to 20 MiB and 16 megapixels. To restore the default splash, uncheck the option and click **Apply**.
 
-**Compatibility:** Currently supports IDEs based on IntelliJ Platform 2026.2. After an IDE update, cache reset, or display-scale change, the default splash may appear once before your image is reapplied.
+**Compatibility:** No upper IDE-version restriction. Uses the IDE's internal splash cache. After an IDE update, cache reset, or display-scale change, the default splash may appear once before your image is reapplied.

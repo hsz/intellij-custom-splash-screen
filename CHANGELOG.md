@@ -14,6 +14,7 @@
 - Rename the settings page to "Custom Splash Screen".
 
 ### Fixed
+- Remove the IDE-version restriction and support newer splash cache formats while retaining legacy compatibility.
 - Refresh the splash cache when the welcome screen is displayed or the plugin is loaded, and remove custom cache entries before the plugin is unloaded.
 - Keep splash previews above the Settings dialog.
 - Dispose splash previews on click, key input, focus loss, replacement, or when Settings closes.

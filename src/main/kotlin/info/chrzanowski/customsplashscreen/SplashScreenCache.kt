@@ -1,7 +1,9 @@
 package info.chrzanowski.customsplashscreen
 
+import com.dynatrace.hash4j.hashing.Hashing
 import java.awt.image.BufferedImage
 import java.io.IOException
+import java.lang.Long.toUnsignedString
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.file.AtomicMoveNotSupportedException
@@ -13,18 +15,33 @@ import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.security.MessageDigest
 import java.util.*
 
-internal class SplashCacheKey private constructor(private val prefix: String) {
+internal class SplashCacheKey private constructor(private val prefix: String, private val suffix: String) {
 
     fun fileName(scale: Float): String {
         require(scale.isFinite() && scale > 0)
-        return "$prefix-${Integer.toUnsignedString(scale.toBits(), 36)}.ij"
+        return "$prefix${Integer.toUnsignedString(scale.toBits(), 36)}$suffix"
     }
 
     companion object {
         fun installed(buildTime: Long, resourcePath: String): SplashCacheKey {
-            val buildId = java.lang.Long.toUnsignedString(buildTime, 36)
+            val buildId = toUnsignedString(buildTime, 36)
             val resourceId = Integer.toUnsignedString(resourcePath.removePrefix("/").hashCode(), 36)
-            return SplashCacheKey("$buildId-$resourceId")
+            return SplashCacheKey("$buildId-$resourceId-", ".ij")
+        }
+
+        fun installedV2(buildNumber: String, resourcePath: String, resourceSize: Int): SplashCacheKey =
+            SplashCacheKey(resourceHash(buildNumber, resourcePath, resourceSize), ".v2.ij")
+
+        fun installedV3(buildNumber: String, resourcePath: String, resourceSize: Int): SplashCacheKey =
+            SplashCacheKey("${resourceHash(buildNumber, resourcePath, resourceSize)}_", ".v3.ij")
+
+        private fun resourceHash(buildNumber: String, resourcePath: String, resourceSize: Int): String {
+            val hash = Hashing.komihash5_0().hashStream()
+                .putChars(buildNumber)
+                .putInt(resourceSize)
+                .putChars(resourcePath.removePrefix("/"))
+                .asLong
+            return toUnsignedString(hash, 36)
         }
     }
 }
@@ -132,7 +149,8 @@ internal class SplashScreenCache(
 
     private fun digest(bytes: ByteArray) = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes))
 
-    private fun isCacheFileName(name: String) = name.matches(Regex("[0-9a-z]+-[0-9a-z]+-[0-9a-z]+\\.ij"))
+    private fun isCacheFileName(name: String) =
+        name.matches(Regex("[0-9a-z]+-[0-9a-z]+-[0-9a-z]+\\.ij|[0-9a-z]+\\.v2\\.ij|[0-9a-z]+_[0-9a-z]+\\.v3\\.ij"))
 }
 
 private fun moveCacheFile(source: Path, target: Path) {
