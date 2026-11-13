@@ -6,6 +6,7 @@ import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.util.SystemInfoRt
 import com.intellij.ui.JreHiDpiUtil
 import com.intellij.ui.scale.JBUIScale
 import kotlinx.coroutines.CoroutineScope
@@ -14,6 +15,7 @@ import kotlinx.coroutines.launch
 import java.awt.GraphicsEnvironment
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.roundToInt
 
 @Service(Service.Level.APP)
 class SplashScreenService(private val coroutineScope: CoroutineScope) {
@@ -96,11 +98,40 @@ internal fun currentSplashKey(appInfo: ApplicationInfo = ApplicationInfo.getInst
 }
 
 private fun splashScales(): Set<Float> {
-    val userScale = JBUIScale.scale(1f)
-    if (!JreHiDpiUtil.isJreHiDPIEnabled()) return setOf(userScale)
+    val jreHiDpi = JreHiDpiUtil.isJreHiDPIEnabled()
+    val userScale = startupUserScale(jreHiDpi, JBUIScale.sysScale())
+    if (!jreHiDpi) return setOf(userScale)
     val systemScales = mutableSetOf(1f, 1.25f, 1.5f, 1.75f, 2f, JBUIScale.sysScale())
     GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.forEach {
         systemScales.add(it.defaultConfiguration.defaultTransform.scaleX.toFloat())
     }
     return systemScales.mapTo(mutableSetOf()) { it * userScale }
 }
+
+/**
+ * Returns the user scale factor the IDE uses when it paints the splash screen.
+ *
+ * The splash is painted before the IDE applies the UI font size and zoom settings
+ * (Settings | Appearance & Behavior | Appearance), so the platform keys its splash cache with the user scale
+ * computed at startup. After startup, `JBUIScale.scale(1f)` includes those settings and produces cache entries
+ * that the splash never reads. This mirrors `JBUIScale.computeUserScaleFactor()`.
+ */
+internal fun startupUserScale(
+    jreHiDpi: Boolean,
+    sysScale: Float,
+    isLinux: Boolean = SystemInfoRt.isLinux,
+    defaultSystemFontSize: Float = JBUIScale.DEF_SYSTEM_FONT_SIZE,
+    property: (String) -> String? = System::getProperty,
+): Float {
+    val debugScale = when (val value = property("ide.ui.scale")) {
+        null -> if (property("ide.ui.scale.override").toBoolean()) 1f else null
+        else -> value.toFloatOrNull()
+    }
+    if (debugScale != null) return debugScale
+    if (!(property("hidpi") ?: "true").toBoolean()) return 1f
+    if (jreHiDpi) return 1f
+    val scale = (sysScale / DISCRETE_SCALE_RESOLUTION).roundToInt() * DISCRETE_SCALE_RESOLUTION
+    return if (isLinux && scale == 1.25f && defaultSystemFontSize == 12f) 1f else scale
+}
+
+private const val DISCRETE_SCALE_RESOLUTION = 0.25f

@@ -9,6 +9,10 @@
 - Two splash screens (`airwaves-1.png`, `airwaves-2.png`) from @antonarhipov 
 - Duke, Kodee, and Runzo transparent splash screen (`crew.png`) 
 
+### Fixed
+
+- Show the custom splash when the IDE zoom or UI font size is changed: cache entries now use the scale the IDE has when it paints the splash, not the scale after these settings are applied.
+
 ## 0.2.1 - 2026-11-12
 
 ### Added
