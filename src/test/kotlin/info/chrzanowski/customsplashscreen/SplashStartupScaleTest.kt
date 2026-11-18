@@ -16,14 +16,32 @@ class SplashStartupScaleTest {
 
     @Test
     fun `IDE-managed HiDPI rounds the system scale to quarter steps`() {
+        assertEquals(1.5f, startupUserScale(jreHiDpi = false, sysScale = 17f / 12f, isLinux = false, property = properties()))
         assertEquals(1.5f, startupUserScale(jreHiDpi = false, sysScale = 1.4f, isLinux = false, property = properties()))
         assertEquals(2f, startupUserScale(jreHiDpi = false, sysScale = 2.1f, isLinux = false, property = properties()))
+    }
+
+    @Test
+    fun `IDE-managed HiDPI floors the system scale to quarter steps when requested`() {
+        for ((sysScale, expected) in listOf(17f / 12f to 1.25f, 1.74f to 1.5f, 1.5f to 1.5f, 2.1f to 2f)) {
+            assertEquals(expected, startupUserScale(false, sysScale, isLinux = false, takeFloor = true, property = properties()))
+        }
     }
 
     @Test
     fun `IDE-managed HiDPI on Linux ignores a 125 percent scale with the default font size`() {
         assertEquals(1f, startupUserScale(false, 1.25f, isLinux = true, defaultSystemFontSize = 12f, property = properties()))
         assertEquals(1.25f, startupUserScale(false, 1.25f, isLinux = true, defaultSystemFontSize = 13f, property = properties()))
+    }
+
+    @Test
+    fun `Linux font adjustment is applied after flooring the system scale`() {
+        for ((fontSize, expected) in listOf(12f to 1f, 13f to 1.25f)) {
+            assertEquals(
+                expected,
+                startupUserScale(false, 17f / 12f, isLinux = true, defaultSystemFontSize = fontSize, takeFloor = true, property = properties()),
+            )
+        }
     }
 
     @Test

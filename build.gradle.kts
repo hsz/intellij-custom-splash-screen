@@ -19,3 +19,12 @@ dependencies {
         // bundledPlugin("com.intellij.java")
     }
 }
+
+intellijPlatformTesting.runIde {
+    register("run263") {
+        localPath = file("/Users/hsz/Applications/IntelliJ IDEA 2026.3.app")
+    }
+    register("runLatest") {
+        localPath = file("/Users/hsz/Applications/IntelliJ IDEA.app")
+    }
+}

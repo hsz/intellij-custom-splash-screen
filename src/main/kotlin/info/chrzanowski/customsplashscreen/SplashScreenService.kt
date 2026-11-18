@@ -7,6 +7,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.util.SystemInfoRt
+import com.intellij.openapi.util.registry.Registry
 import com.intellij.ui.JreHiDpiUtil
 import com.intellij.ui.scale.JBUIScale
 import kotlinx.coroutines.CoroutineScope
@@ -99,7 +100,11 @@ internal fun currentSplashKey(appInfo: ApplicationInfo = ApplicationInfo.getInst
 
 private fun splashScales(): Set<Float> {
     val jreHiDpi = JreHiDpiUtil.isJreHiDPIEnabled()
-    val userScale = startupUserScale(jreHiDpi, JBUIScale.sysScale())
+    val userScale = startupUserScale(
+        jreHiDpi,
+        JBUIScale.sysScale(),
+        takeFloor = Registry.`is`("ide.scale.discrete.take.floor", false),
+    )
     if (!jreHiDpi) return setOf(userScale)
     val systemScales = mutableSetOf(1f, 1.25f, 1.5f, 1.75f, 2f, JBUIScale.sysScale())
     GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.forEach {
@@ -121,6 +126,7 @@ internal fun startupUserScale(
     sysScale: Float,
     isLinux: Boolean = SystemInfoRt.isLinux,
     defaultSystemFontSize: Float = JBUIScale.DEF_SYSTEM_FONT_SIZE,
+    takeFloor: Boolean = false,
     property: (String) -> String? = System::getProperty,
 ): Float {
     val debugScale = when (val value = property("ide.ui.scale")) {
@@ -130,7 +136,9 @@ internal fun startupUserScale(
     if (debugScale != null) return debugScale
     if (!(property("hidpi") ?: "true").toBoolean()) return 1f
     if (jreHiDpi) return 1f
-    val scale = (sysScale / DISCRETE_SCALE_RESOLUTION).roundToInt() * DISCRETE_SCALE_RESOLUTION
+    val scale = (sysScale / DISCRETE_SCALE_RESOLUTION).let {
+        if (takeFloor) it.toInt() else it.roundToInt()
+    } * DISCRETE_SCALE_RESOLUTION
     return if (isLinux && scale == 1.25f && defaultSystemFontSize == 12f) 1f else scale
 }
 

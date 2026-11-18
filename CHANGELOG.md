@@ -11,7 +11,8 @@
 
 ### Fixed
 
-- Show the custom splash when the IDE zoom or UI font size is changed: cache entries now use the scale the IDE has when it paints the splash, not the scale after these settings are applied.
+- Keep custom splash screens visible after changing the IDE zoom or UI font size by using the startup UI scale for cache entries.
+- Honor `ide.scale.discrete.take.floor` when preparing splash cache entries on IDE-managed HiDPI displays, preventing a fallback to the default splash.
 
 ## 0.2.1 - 2026-11-12
 
