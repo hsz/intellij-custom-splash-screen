@@ -7,7 +7,8 @@
 ### Added
 
 - Two splash screens (`airwaves-1.png`, `airwaves-2.png`) from @antonarhipov 
-- Duke, Kodee, and Runzo transparent splash screen (`crew.png`) 
+- Duke, Kodee, and Runzo transparent splash screen (`crew.png`)
+- Add GTA-themed splash screen image
 
 ### Fixed
 
